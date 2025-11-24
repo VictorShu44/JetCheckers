@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">JetCheckers</string>
+    <string name="profile">profile</string>
+    <string name="scrollable">scrollable</string>
+    <string name="dialog">dialog</string>
+    <string name="dashboard">dashboard</string>
 </resources>
