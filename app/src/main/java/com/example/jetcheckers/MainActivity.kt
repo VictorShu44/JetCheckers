@@ -43,18 +43,28 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
+import com.example.jetcheckers.di.EntryProviderInstaller
+import com.example.jetcheckers.di.Navigator
 import com.example.jetcheckers.navigation.NavigateBackButton
 import com.example.jetcheckers.navigation.NavigateButton
 import com.example.jetcheckers.ui.theme.JetCheckersTheme
 import kotlinx.serialization.Serializable
+import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var navigator: Navigator
+
+    @Inject
+    lateinit var entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             JetCheckersTheme {
-                JetCheckersApp()
+                JetCheckersApp(navigator = navigator, entryProviderScopes = entryProviderScopes )
             }
         }
     }
@@ -62,12 +72,12 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun JetCheckersApp() {
+fun JetCheckersApp(navigator: Navigator,entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller> ) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val navSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
 
-    val backStack = rememberNavBackStack(CatList)
+ //   val backStack = rememberNavBackStack(CatList)
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -89,7 +99,13 @@ fun JetCheckersApp() {
 
             SharedTransitionLayout {
                 NavDisplay(
-                    backStack = backStack,
+                    backStack = navigator.backStack,
+                    modifier = Modifier.padding(innerPadding),
+                    onBack = { navigator.goBack() },
+                    entryProvider = entryProvider {
+                        entryProviderScopes.forEach { builder -> this.builder() }
+                    }
+                    /*backStack = backStack,
                     onBack = { backStack.removeAt(backStack.lastIndex) },
                     entryProvider =
                         entryProvider {
@@ -106,7 +122,7 @@ fun JetCheckersApp() {
                                     backStack.removeAt(backStack.lastIndex)
                                 }
                             }
-                        },
+                        },*/
                 )
             }
         }

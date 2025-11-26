@@ -23,3 +23,5 @@ rootProject.name = "JetCheckers"
 include(":app")
 include(":core:network")
 include(":feature:login")
+include(":feature:conversation")
+include(":feature:profile")
