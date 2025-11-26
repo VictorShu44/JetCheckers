@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.jetcheckers"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -46,6 +46,10 @@ android {
 
 dependencies {
 
+    implementation(project(":feature:conversation"))
+    implementation(project(":feature:profile"))
+    implementation(project(":core:models"))
+    implementation(project(":core:design"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

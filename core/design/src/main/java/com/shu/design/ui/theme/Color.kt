@@ -1,4 +1,4 @@
-package com.example.jetcheckers.ui.theme
+package com.shu.design.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

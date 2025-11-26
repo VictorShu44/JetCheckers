@@ -1,23 +1,19 @@
 package com.example.jetcheckers.di
 
 import com.shu.conversation.ConversationDetailScreen
+import com.shu.conversation.ConversationListScreen
 import com.shu.design.models.ConversationDetail
 import com.shu.design.models.ConversationList
-import com.shu.conversation.ConversationListScreen
 import com.shu.models.Profile
-
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.multibindings.IntoSet
 
-// API
-
-// IMPL
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-object ConversationModule {
+object BottomModule {
 
     @IntoSet
     @Provides
@@ -35,4 +31,3 @@ object ConversationModule {
             }
         }
 }
-

@@ -32,7 +32,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Modifier.Companion
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,17 +39,18 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import com.example.jetcheckers.di.EntryProviderInstaller
 import com.example.jetcheckers.di.Navigator
 import com.example.jetcheckers.navigation.NavigateBackButton
 import com.example.jetcheckers.navigation.NavigateButton
-import com.example.jetcheckers.ui.theme.JetCheckersTheme
+import com.shu.design.ui.theme.JetCheckersTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
@@ -96,8 +96,6 @@ fun JetCheckersApp(navigator: Navigator,entryProviderScopes: Set<@JvmSuppressWil
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-
-            SharedTransitionLayout {
                 NavDisplay(
                     backStack = navigator.backStack,
                     modifier = Modifier.padding(innerPadding),
@@ -124,7 +122,6 @@ fun JetCheckersApp(navigator: Navigator,entryProviderScopes: Set<@JvmSuppressWil
                             }
                         },*/
                 )
-            }
         }
     }
 }

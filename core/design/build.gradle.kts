@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.shu.conversation"
+    namespace = "com.shu.design"
     compileSdk = 36
 
     defaultConfig {
@@ -27,10 +27,6 @@ android {
             )
         }
     }
-    buildFeatures {
-        compose = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -38,12 +34,13 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
-
-    implementation(project(":core:models"))
-    implementation(project(":core:design"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
