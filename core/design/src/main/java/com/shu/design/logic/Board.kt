@@ -1,12 +1,36 @@
 // Файл: feture/checkers/logic/CheckersGame.kt
-package com.example.jetcheckers.logic
+package com.shu.design.logic
 
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlin.math.abs
 
-// Enum-классы Color, PieceType, Player и data-класс Piece остаются без изменений
+/**
+ * Перечисление для игроков (цветов шашек)
+ */
+enum class Player {
+    WHITE, BLACK
+}
+
+/**
+ * Перечисление для типов шашек
+ */
+enum class PieceType {
+    MAN, // Обычная шашка
+    KING // Дамка
+}
+
+/**
+ * Класс, представляющий одну шашку на доске
+ * @param owner Игрок, которому принадлежит шашка
+ * @param type Тип шашки (обычная или дамка)
+ */
+data class Piece(val owner: Player, var type: PieceType = PieceType.MAN)
+
+
+// ----------- КОНЕЦ НЕДОСТАЮЩИХ КЛАССОВ -----------
+
 
 class Board {
     val size = 8
@@ -15,7 +39,62 @@ class Board {
     init {
         initPieces()
     }
-    // ... функции getPiece, setPiece, inside, initPieces остаются такими же
+
+    // ----------- НЕДОСТАЮЩИЕ ФУНКЦИИ -----------
+
+    /**
+     * Получает шашку по координатам (строка, столбец)
+     */
+    fun getPiece(row: Int, col: Int): Piece? {
+        return if (inside(row, col)) cells[row][col] else null
+    }
+
+    /**
+     * Устанавливает шашку в заданную клетку
+     */
+    fun setPiece(row: Int, col: Int, piece: Piece?) {
+        if (inside(row, col)) {
+            cells[row][col] = piece
+        }
+    }
+
+    /**
+     * Проверяет, находятся ли координаты в пределах доски
+     */
+    fun inside(row: Int, col: Int): Boolean {
+        return row >= 0 && row < size && col >= 0 && col < size
+    }
+
+    /**
+     * Расставляет шашки в начальную позицию
+     */
+    fun initPieces() {
+        // Очищаем доску на случай повторной инициализации
+        for (r in 0 until size) {
+            for (c in 0 until size) {
+                cells[r][c] = null
+            }
+        }
+
+        // Расставляем черные и белые шашки
+        for (r in 0 until 3) {
+            for (c in 0 until size) {
+                if ((r + c) % 2 != 0) {
+                    setPiece(r, c, Piece(Player.BLACK))
+                }
+            }
+        }
+
+        for (r in 5 until size) {
+            for (c in 0 until size) {
+                if ((r + c) % 2 != 0) {
+                    setPiece(r, c, Piece(Player.WHITE))
+                }
+            }
+        }
+    }
+
+    // ----------- КОНЕЦ НЕДОСТАЮЩИХ ФУНКЦИЙ -----------
 }
 
 /** Состояние игры для UI */

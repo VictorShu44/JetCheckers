@@ -1,11 +1,10 @@
-package com.example.jetcheckers.logic
+package com.shu.design.logic
 
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.input.key.type
-import androidx.wear.compose.foundation.weight
 
 // Файл: feture/checkers/ui/CheckersScreen.kt
 
@@ -25,20 +24,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.msm.feture.checkers.logic.CheckersGame
-import com.msm.feture.checkers.logic.Piece
-import com.msm.feture.checkers.logic.PieceType
-import com.msm.feture.checkers.logic.Player
 
 @Composable
 fun CheckersScreen() {
     val game = remember { CheckersGame() }
     val gameState = game.gameState.value
 
-    androidx.compose.foundation.layout.Column(
+    Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Шашки",
@@ -63,19 +58,19 @@ fun CheckersScreen() {
 
 @Composable
 fun BoardView(
-    board: com.msm.feture.checkers.logic.Board,
+    board: Board,
     selectedPiece: Pair<Int, Int>?,
     onCellClick: (row: Int, col: Int) -> Unit
 ) {
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f) // Делаем доску квадратной
             .border(2.dp, Color.Black)
     ) {
-        androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             for (row in 0 until board.size) {
-                androidx.compose.foundation.layout.Row(
+                Row(
                     modifier = Modifier.weight(1f)
                 ) {
                     for (col in 0 until board.size) {
@@ -88,7 +83,7 @@ fun BoardView(
                             else -> Color(0xFFB58863)     // Темная клетка
                         }
 
-                        androidx.compose.foundation.layout.Box(
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .aspectRatio(1f)
@@ -112,7 +107,7 @@ fun PieceView(piece: Piece) {
     val pieceColor = if (piece.owner == Player.WHITE) Color.White else Color.Black
     val borderColor = if (piece.owner == Player.WHITE) Color.Black else Color.Gray
 
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .fillMaxSize(0.8f)
             .shadow(4.dp, CircleShape)
