@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             JetCheckersTheme {
-                JetCheckersApp(navigator = navigator, entryProviderScopes = entryProviderScopes )
+                JetCheckersApp(navigator = navigator, entryProviderScopes = entryProviderScopes)
             }
         }
     }
@@ -72,57 +72,59 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun JetCheckersApp(navigator: Navigator,entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller> ) {
+fun JetCheckersApp(
+    navigator: Navigator,
+    entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
+) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     val navSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
 
- //   val backStack = rememberNavBackStack(CatList)
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+    //   val backStack = rememberNavBackStack(CatList)
+    /* NavigationSuiteScaffold(
+         navigationSuiteItems = {
+             AppDestinations.entries.forEach {
+                 item(
+                     icon = {
+                         Icon(
+                             it.icon,
+                             contentDescription = it.label
+                         )
+                     },
+                     label = { Text(it.label) },
+                     selected = it == currentDestination,
+                     onClick = { currentDestination = it }
+                 )
+             }
+         }
+     ) {*/
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        NavDisplay(
+            backStack = navigator.backStack,
+            modifier = Modifier.padding(innerPadding),
+            onBack = { navigator.goBack() },
+            entryProvider = entryProvider {
+                entryProviderScopes.forEach { builder -> this.builder() }
             }
-        }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                NavDisplay(
-                    backStack = navigator.backStack,
-                    modifier = Modifier.padding(innerPadding),
-                    onBack = { navigator.goBack() },
-                    entryProvider = entryProvider {
-                        entryProviderScopes.forEach { builder -> this.builder() }
+            /*backStack = backStack,
+            onBack = { backStack.removeAt(backStack.lastIndex) },
+            entryProvider =
+                entryProvider {
+                    entry<CatList> {
+                        CatList(this@SharedTransitionLayout) { cat ->
+                            backStack.add(CatDetail(cat))
+                        }
                     }
-                    /*backStack = backStack,
-                    onBack = { backStack.removeAt(backStack.lastIndex) },
-                    entryProvider =
-                        entryProvider {
-                            entry<CatList> {
-                                CatList(this@SharedTransitionLayout) { cat ->
-                                    backStack.add(CatDetail(cat))
-                                }
-                            }
-                            entry<CatDetail> { args ->
-                                CatDetail(
-                                    args.cat,
-                                    this@SharedTransitionLayout
-                                ) {
-                                    backStack.removeAt(backStack.lastIndex)
-                                }
-                            }
-                        },*/
-                )
-        }
+                    entry<CatDetail> { args ->
+                        CatDetail(
+                            args.cat,
+                            this@SharedTransitionLayout
+                        ) {
+                            backStack.removeAt(backStack.lastIndex)
+                        }
+                    }
+                },*/
+        )
     }
 }
 
@@ -151,9 +153,11 @@ fun GreetingPreview() {
     }
 }
 
-@Serializable object CatList : NavKey
+@Serializable
+object CatList : NavKey
 
-@Serializable data class CatDetail(val cat: Cat) : NavKey
+@Serializable
+data class CatDetail(val cat: Cat) : NavKey
 
 @Serializable
 data class Cat(@DrawableRes val imageId: Int, val name: String, val description: String)
@@ -173,7 +177,8 @@ fun CatList(sharedScope: SharedTransitionScope, onClick: (cat: Cat) -> Unit) {
             Row(Modifier.clickable { onClick(cat) }) {
                 with(sharedScope) {
                     val imageModifier =
-                        Modifier.size(100.dp)
+                        Modifier
+                            .size(100.dp)
                             .sharedElement(
                                 sharedScope.rememberSharedContentState(key = cat.imageId),
                                 animatedVisibilityScope = LocalNavAnimatedContentScope.current,
@@ -193,7 +198,8 @@ fun CatDetail(cat: Cat, sharedScope: SharedTransitionScope, onBack: () -> Unit) 
         Box {
             with(sharedScope) {
                 val imageModifier =
-                    Modifier.size(300.dp)
+                    Modifier
+                        .size(300.dp)
                         .sharedElement(
                             sharedScope.rememberSharedContentState(key = cat.imageId),
                             animatedVisibilityScope = LocalNavAnimatedContentScope.current,
@@ -209,7 +215,9 @@ fun CatDetail(cat: Cat, sharedScope: SharedTransitionScope, onBack: () -> Unit) 
 
 @Composable
 fun HomeScreen(backStackString: String, onClick: () -> Unit) {
-    Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
+    Column(Modifier
+        .fillMaxSize()
+        .then(Modifier.padding(8.dp))) {
         Text(text = "Home Page")
         Text(text = "current backStack:$backStackString")
         NavigateButton("Detail", onClick)
@@ -218,7 +226,9 @@ fun HomeScreen(backStackString: String, onClick: () -> Unit) {
 
 @Composable
 fun UserScreen(backStackString: String, onClick: () -> Unit) {
-    Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
+    Column(Modifier
+        .fillMaxSize()
+        .then(Modifier.padding(8.dp))) {
         Text(text = "User Page")
         Text(text = "current backStack:$backStackString")
         NavigateButton("Detail", onClick)
@@ -227,7 +237,9 @@ fun UserScreen(backStackString: String, onClick: () -> Unit) {
 
 @Composable
 fun DetailScreen(backStackString: String, sourceTab: String) {
-    Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
+    Column(Modifier
+        .fillMaxSize()
+        .then(Modifier.padding(8.dp))) {
         Text(text = "Detail Page $sourceTab")
         Text(text = "current backStack:$backStackString")
     }
