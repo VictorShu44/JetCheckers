@@ -1,10 +1,9 @@
-package com.shu.design.logic
+package com.shu.conversation.logic
 
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.input.key.type
 
 // Файл: feture/checkers/ui/CheckersScreen.kt
 

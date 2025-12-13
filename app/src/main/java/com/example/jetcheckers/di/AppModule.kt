@@ -1,5 +1,6 @@
 package com.example.jetcheckers.di
 
+import com.shu.design.models.Checkers
 import com.shu.design.models.ConversationList
 import dagger.Module
 import dagger.Provides
@@ -13,9 +14,9 @@ object AppModule {
 
     @Provides
     @ActivityRetainedScoped
-    fun provideNavigator() : Navigator = Navigator(startDestination = ConversationList)
+    fun provideNavigator() : Navigator = Navigator(startDestination = Checkers)
 
- @Provides
+ /*@Provides
     @ActivityRetainedScoped
-    fun provideShared() : Navigator = Navigator(startDestination = ConversationList)
+    fun provideShared() : Navigator = Navigator(startDestination = ConversationList)*/
 }

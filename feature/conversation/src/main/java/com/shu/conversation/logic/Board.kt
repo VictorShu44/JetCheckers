@@ -1,5 +1,5 @@
 // Файл: feture/checkers/logic/CheckersGame.kt
-package com.shu.design.logic
+package com.shu.conversation.logic
 
 
 import androidx.compose.runtime.MutableState
@@ -26,7 +26,7 @@ enum class PieceType {
  * @param owner Игрок, которому принадлежит шашка
  * @param type Тип шашки (обычная или дамка)
  */
-data class Piece(val owner: Player, var type: PieceType = PieceType.MAN)
+data class Piece(val owner: Player, var type: PieceType = PieceType.MAN, val position: Position)
 
 
 // ----------- КОНЕЦ НЕДОСТАЮЩИХ КЛАССОВ -----------
@@ -80,7 +80,8 @@ class Board {
         for (r in 0 until 3) {
             for (c in 0 until size) {
                 if ((r + c) % 2 != 0) {
-                    setPiece(r, c, Piece(Player.BLACK))
+                    setPiece(r, c, Piece(Player.BLACK,
+                        position = Position(r, c)))
                 }
             }
         }
@@ -88,7 +89,10 @@ class Board {
         for (r in 5 until size) {
             for (c in 0 until size) {
                 if ((r + c) % 2 != 0) {
-                    setPiece(r, c, Piece(Player.WHITE))
+                    setPiece(r, c, Piece(
+                        Player.WHITE,
+                        position = Position(r, c)
+                    ))
                 }
             }
         }
@@ -151,6 +155,7 @@ class CheckersGame {
                     // Цепочка захватов окончена или это был обычный ход
                     mustCapture = false
                     selectedPiece = null
+                    updateState()
                     switchPlayer()
                 }
             } else {

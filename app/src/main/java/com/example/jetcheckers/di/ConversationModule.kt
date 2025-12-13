@@ -1,10 +1,7 @@
 package com.example.jetcheckers.di
 
-import com.shu.conversation.ConversationDetailScreen
-import com.shu.design.models.ConversationDetail
-import com.shu.design.models.ConversationList
-import com.shu.conversation.ConversationListScreen
-import com.shu.models.Profile
+import com.shu.conversation.logic.CheckersScreen
+import com.shu.design.models.Checkers
 
 import dagger.Module
 import dagger.Provides
@@ -23,7 +20,11 @@ object ConversationModule {
     @Provides
     fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller =
         {
-            entry<ConversationList> {
+
+            entry<Checkers> {
+                CheckersScreen()
+            }
+           /* entry<ConversationList> {
                 ConversationListScreen(
                     onConversationClicked = { conversationDetail ->
                         navigator.goTo(conversationDetail)
@@ -32,7 +33,7 @@ object ConversationModule {
             }
             entry<ConversationDetail> { key ->
                 ConversationDetailScreen(key) { navigator.goTo(Profile) }
-            }
+            }*/
         }
 }
 
