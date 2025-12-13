@@ -2,8 +2,15 @@
 package com.shu.conversation.logic
 
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.input.pointer.PointerIcon
+import com.shu.conversation.ai.AIFactory
+import com.shu.conversation.ai.AIFactory.Difficulty
+import com.shu.conversation.ai.printBoard
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 import kotlin.math.abs
 
 /**
@@ -45,24 +52,35 @@ class Board {
     /**
      * Получает шашку по координатам (строка, столбец)
      */
-    fun getPiece(row: Int, col: Int): Piece? {
-        return if (inside(row, col)) cells[row][col] else null
+    fun getPiece(position: Position): Piece? {
+        return if (inside(position)) cells[position.row][position.col] else null
     }
 
     /**
      * Устанавливает шашку в заданную клетку
      */
-    fun setPiece(row: Int, col: Int, piece: Piece?) {
-        if (inside(row, col)) {
-            cells[row][col] = piece
+    fun setPiece(position: Position, piece: Piece) {
+        if (inside(position)) {
+                cells[position.row][position.col] = Piece(
+                    owner = piece.owner,
+                    type = piece.type,
+                    position = position
+                )
+        }
+    }
+    fun setPieceNull(position: Position, piece: Piece) {
+        if (inside(position)) {
+
+                cells[position.row][position.col] = null
+
         }
     }
 
     /**
      * Проверяет, находятся ли координаты в пределах доски
      */
-    fun inside(row: Int, col: Int): Boolean {
-        return row >= 0 && row < size && col >= 0 && col < size
+    fun inside(position: Position): Boolean {
+        return position.row >= 0 && position.row < size && position.col >= 0 && position.col < size
     }
 
     /**
@@ -80,8 +98,12 @@ class Board {
         for (r in 0 until 3) {
             for (c in 0 until size) {
                 if ((r + c) % 2 != 0) {
-                    setPiece(r, c, Piece(Player.BLACK,
-                        position = Position(r, c)))
+                    setPiece(
+                        Position(r, c), Piece(
+                            Player.BLACK,
+                            position = Position(r, c)
+                        )
+                    )
                 }
             }
         }
@@ -89,10 +111,12 @@ class Board {
         for (r in 5 until size) {
             for (c in 0 until size) {
                 if ((r + c) % 2 != 0) {
-                    setPiece(r, c, Piece(
-                        Player.WHITE,
-                        position = Position(r, c)
-                    ))
+                    setPiece(
+                        Position(r, c), Piece(
+                            Player.WHITE,
+                            position = Position(r, c)
+                        )
+                    )
                 }
             }
         }
@@ -112,7 +136,11 @@ data class GameState(
 /** Основная логика игры, адаптированная для Compose */
 class CheckersGame {
     private var board = Board()
+
+    private val mediumAI = AIFactory.createAI(Difficulty.MEDIUM)
     private var selectedPiece: Pair<Int, Int>? = null
+
+    private var moveRight: Move? = null
     private var mustCapture = false // Флаг, указывающий на обязательный захват
 
     // Live-данные для UI
@@ -129,7 +157,7 @@ class CheckersGame {
     /** Обрабатывает нажатие на клетку (row, col) */
     fun handleCellClick(row: Int, col: Int) {
         val currentSelected = selectedPiece
-        val clickedPiece = board.getPiece(row, col)
+        val clickedPiece = board.getPiece(Position(row, col))
 
         if (currentSelected == null) {
             // 1. Попытка выбрать шашку
@@ -148,37 +176,54 @@ class CheckersGame {
 
                 // Проверяем, возможен ли следующий захват той же шашкой
                 if (isCapture && canCaptureFrom(row, col)) {
+                    Log.d("mov", "isCapture $isCapture ")
                     mustCapture = true
                     selectedPiece = Pair(row, col) // Оставляем шашку выбранной для следующего хода
                     updateState(newStatus = "Необходимо продолжить захват!")
                 } else {
                     // Цепочка захватов окончена или это был обычный ход
+                    Log.d("mov", "switch Player ")
                     mustCapture = false
                     selectedPiece = null
+                    moveRight = null
                     updateState()
                     switchPlayer()
                 }
             } else {
                 // 3. Ход не удался, возможно, игрок хочет выбрать другую шашку
-                if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
-                    selectedPiece = Pair(row, col) // Выбираем другую свою шашку
-                    updateState()
+                if (gameState.value.currentPlayer == Player.WHITE) {
+                    Log.d("mov", "Ход не удался, возможно, игрок хочет выбрать другую шашку ")
+                    if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
+                        Log.d("mov", "Выбираем другую свою шашку ")
+                        selectedPiece = Pair(row, col) // Выбираем другую свою шашку
+                        updateState()
+                    } else {
+                        selectedPiece = null // Снимаем выделение
+                        updateState()
+                    }
                 } else {
-                    selectedPiece = null // Снимаем выделение
+                    Log.d("mov", "Неправильный ход ")
+                    mustCapture = false
+                    selectedPiece = null
+                    moveRight = null
                     updateState()
+                    switchPlayer()
                 }
             }
         }
     }
 
     private fun switchPlayer() {
-        val nextPlayer = if (gameState.value.currentPlayer == Player.WHITE) Player.BLACK else Player.WHITE
+        val nextPlayer = if (gameState.value.currentPlayer == Player.WHITE) {
+            Player.BLACK
+        } else Player.WHITE
         val message = "Ход ${if (nextPlayer == Player.WHITE) "белых" else "чёрных"}"
         gameState.value = gameState.value.copy(currentPlayer = nextPlayer, statusMessage = message)
     }
 
     private fun updateState(newStatus: String? = null) {
-        val status = newStatus ?: "Ход ${if (gameState.value.currentPlayer == Player.WHITE) "белых" else "чёрных"}"
+        val status = newStatus
+            ?: "Ход ${if (gameState.value.currentPlayer == Player.WHITE) "белых" else "чёрных"}"
         gameState.value = gameState.value.copy(
             board = board,
             selectedPiece = selectedPiece,
@@ -186,20 +231,55 @@ class CheckersGame {
         )
     }
 
+    suspend fun moveBlack() {
+        var isTry = false
+        var count = 0
+        var move: Move? = null
+      //  do {
+            move = mediumAI.findBestMove(board.cells, Player.BLACK)
+           // Log.d("mov", " ${move.from.row},${move.from.col}, ${move.to.row}, ${move.to.col}")
+            yield()
+            isTry = tryMove(move.from.row, move.from.col, move.to.row, move.to.col)
+           // Log.d("mov", "tryWrong[$isTry] ")
+            count++
+       // } while (count == 1)
+        move?.let {
+            moveRight = move
+            handleCellClick(move.from.row, move.from.col)
+        }
+    }
+
+
+    suspend fun moveBlackTo() {
+        moveRight?.let { move ->
+            delay(1000L)
+            handleCellClick(move.to.row, move.to.col)
+        }
+    }
+
     private fun tryMove(sr: Int, sc: Int, dr: Int, dc: Int): Boolean {
-        if (!board.inside(dr, dc) || board.getPiece(dr, dc) != null) return false
+        if (!board.inside(Position(dr, dc)) || board.getPiece(
+                Position(
+                    dr,
+                    dc
+                )
+            ) != null
+        ) return false
         if (mustCapture && abs(dr - sr) != 2) return false // Если должны бить, обычный ход запрещен
 
-        val piece = board.getPiece(sr, sc)!!
-        val dir = if (piece.owner == Player.WHITE) -1 else 1
+        val piece = board.getPiece(Position(sr, sc))
+        piece?.let {
+        val dir = if (piece?.owner == Player.WHITE) -1 else 1
         val dy = dr - sr
         val dx = dc - sc
 
         // Обычный ход
         if (abs(dy) == 1 && abs(dx) == 1 && !mustCapture) {
-            if (piece.type == PieceType.MAN && dy != dir) return false
-            board.setPiece(dr, dc, piece)
-            board.setPiece(sr, sc, null)
+            if (piece?.type == PieceType.MAN && dy != dir) return false
+            board.setPiece(Position(dr, dc),
+                piece
+            )
+            board.setPieceNull(Position(sr, sc), piece)
             return true
         }
 
@@ -207,25 +287,32 @@ class CheckersGame {
         if (abs(dy) == 2 && abs(dx) == 2) {
             val midR = sr + dy / 2
             val midC = sc + dx / 2
-            val middle = board.getPiece(midR, midC)
-            if (middle != null && middle.owner != piece.owner) {
-                board.setPiece(midR, midC, null) // Удаляем захваченную
-                board.setPiece(dr, dc, piece)
-                board.setPiece(sr, sc, null)
+            val middle = board.getPiece(Position(midR, midC))
+            if (middle != null && middle.owner != piece?.owner) {
+                board.setPieceNull(Position(midR, midC), piece) // Удаляем захваченную
+                board.setPiece(Position(dr, dc), piece)
+                board.setPieceNull(Position(sr, sc), piece)
                 return true
             }
         }
+            }
         return false
     }
 
     /** Проверяет, может ли шашка в (r, c) совершить захват */
     private fun canCaptureFrom(r: Int, c: Int): Boolean {
-        val piece = board.getPiece(r, c) ?: return false
+        val piece = board.getPiece(Position(r, c)) ?: return false
         val dirs = listOf(Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1))
 
         for ((dr, dc) in dirs) {
-            if (board.inside(r + dr * 2, c + dc * 2) && board.getPiece(r + dr * 2, c + dc * 2) == null) {
-                val middlePiece = board.getPiece(r + dr, c + dc)
+            if (board.inside(
+                    Position(
+                        r + dr * 2,
+                        c + dc * 2
+                    )
+                ) && board.getPiece(Position(r + dr * 2, c + dc * 2)) == null
+            ) {
+                val middlePiece = board.getPiece(Position(r + dr, c + dc))
                 if (middlePiece != null && middlePiece.owner != piece.owner) {
                     return true
                 }
@@ -235,10 +322,10 @@ class CheckersGame {
     }
 
     private fun maybeKing(r: Int, c: Int) {
-        val piece = board.getPiece(r, c) ?: return
+        val piece = board.getPiece(Position(r, c)) ?: return
         if (piece.type == PieceType.MAN) {
             if ((piece.owner == Player.WHITE && r == 0) || (piece.owner == Player.BLACK && r == 7)) {
-                piece.type = PieceType.KING
+                piece.type = PieceType.KING //переделать на val
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.shu.conversation.logic
 
+import android.util.Log
 import kotlin.math.abs
 
 // Типы шашек
@@ -93,13 +94,16 @@ class DraughtsMoveGenerator {
 
         // Проверяем простые ходы
         for ((dr, dc) in directions) {
+
             val newRow = piece.position.row + dr
             val newCol = piece.position.col + dc
-
+           // Log.d("mov", " direction $dr , $dc [${piece.position.row} ${piece.position.col}]  [$newRow $newCol] ")
+           // Log.d("mov", " before isValidPosition ${isValidPosition(newRow, newCol)} ,  ")
             if (isValidPosition(newRow, newCol) && board[newRow][newCol] == null) {
                 val becomesKing = (piece.owner  == Player.WHITE && newRow == 0) ||
                         (piece.owner == Player.BLACK && newRow == 7)
-
+             //   Log.d("mov", " direction $dr , $dc [${piece.position.row} ${piece.position.col}]  [$newRow $newCol] ")
+              //  Log.d("mov", " isValidPosition ${isValidPosition(newRow, newCol)} , board ${board[newRow][newCol]} ")
                 moves.add(Move(piece.position, Position(newRow, newCol), becomesKing = becomesKing))
             }
         }
