@@ -21,9 +21,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "JetCheckers"
 include(":app")
-include(":core:network")
 include(":feature:login")
 include(":feature:conversation")
 include(":feature:profile")
 include(":core:models")
 include(":core:design")
+include(":core:ktor")
+include(":core:domain")
