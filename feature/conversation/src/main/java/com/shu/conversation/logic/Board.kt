@@ -15,7 +15,7 @@ import kotlin.math.abs
  * Перечисление для игроков (цветов шашек)
  */
 enum class Player {
-    WHITE, BLACK
+    WHITE, BLACK //, AI_BLACK, AI_WHITE
 }
 
 /**
@@ -60,17 +60,18 @@ class Board {
      */
     fun setPiece(position: Position, piece: Piece) {
         if (inside(position)) {
-                cells[position.row][position.col] = Piece(
-                    owner = piece.owner,
-                    type = piece.type,
-                    position = position
-                )
+            cells[position.row][position.col] = Piece(
+                owner = piece.owner,
+                type = piece.type,
+                position = position
+            )
         }
     }
+
     fun setPieceNull(position: Position, piece: Piece) {
         if (inside(position)) {
 
-                cells[position.row][position.col] = null
+            cells[position.row][position.col] = null
 
         }
     }
@@ -139,6 +140,7 @@ class CheckersGame {
     private val mediumAI = AIFactory.createAI(Difficulty.HARD)
     private var selectedPiece: Pair<Int, Int>? = null
 
+    private var moveAI: Boolean = false
     private var moveRight: Move? = null
     private var mustCapture = false // Флаг, указывающий на обязательный захват
 
@@ -155,7 +157,7 @@ class CheckersGame {
 
     fun restart() {
         board = Board()
-      val state =  createInitialGameState()
+        val state = createInitialGameState()
         gameState.value = gameState.value.copy(
             board = state.board,
             selectedPiece = state.selectedPiece,
@@ -164,7 +166,7 @@ class CheckersGame {
     }
 
     /** Обрабатывает нажатие на клетку (row, col) */
-     fun handleCellClick(row: Int, col: Int) {
+    fun handleCellClick(row: Int, col: Int) {
         val currentSelected = selectedPiece
         val clickedPiece = board.getPiece(Position(row, col))
         clickedPiece?.let {
@@ -172,7 +174,7 @@ class CheckersGame {
                 "mov",
                 "clickedPiece row ${clickedPiece?.position?.row} col ${clickedPiece?.position?.col}"
             )
-        }
+        } ?: Log.d("mov", "clickedPiece null")
         if (currentSelected == null) {
             // 1. Попытка выбрать шашку
             if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
@@ -200,6 +202,8 @@ class CheckersGame {
                     mustCapture = false
                     selectedPiece = null
                     moveRight = null
+                    moveAI = true
+                    Log.d("mov", "moveAI do")
                     switchPlayer()
                     updateState()
                 }
@@ -216,12 +220,19 @@ class CheckersGame {
                         updateState()
                     }
                 } else {
-                    Log.d("mov", "Неправильный ход ")
-                    mustCapture = false
-                    selectedPiece = null
-                    moveRight = null
-                   // switchPlayer()
-                    updateState()
+                    if (moveAI) {
+
+                        mustCapture = false
+                        selectedPiece = null
+                        moveRight = null
+                        switchPlayer()
+                        updateState()
+                    } else {
+                        Log.d("mov", "Неправильный ход r $row, c $col ")
+                        selectedPiece = null // Снимаем выделение
+                        updateState()
+                        moveBlack()
+                    }
                 }
             }
         }
@@ -245,30 +256,20 @@ class CheckersGame {
         )
     }
 
-    suspend fun moveBlack() {
-        var isTry = false
-        var count = 0
+    fun moveBlack() {
         var move: Move? = null
-      //  do {
-            move = mediumAI.findBestMove(board.cells, Player.BLACK)
-           // Log.d("mov", " ${move.from.row},${move.from.col}, ${move.to.row}, ${move.to.col}")
-            yield()
-            isTry = tryMove(move.from.row, move.from.col, move.to.row, move.to.col)
-           // Log.d("mov", "tryWrong[$isTry] ")
-            count++
-       // } while (count == 1)
+        move = mediumAI.findBestMove(board.cells, Player.BLACK)
         move?.let {
             moveRight = move
             handleCellClick(move.from.row, move.from.col)
         }
     }
 
-
-    suspend fun moveBlackTo() {
+    fun moveBlackTo() {
         moveRight?.let { move ->
-            delay(1000L)
+            moveAI = true
             handleCellClick(move.to.row, move.to.col)
-            updateState()
+            // updateState()
         }
     }
 
@@ -284,33 +285,34 @@ class CheckersGame {
 
         val piece = board.getPiece(Position(sr, sc))
         piece?.let {
-        val dir = if (piece?.owner == Player.WHITE) -1 else 1
-        val dy = dr - sr
-        val dx = dc - sc
+            val dir = if (piece?.owner == Player.WHITE) -1 else 1
+            val dy = dr - sr
+            val dx = dc - sc
 
-        // Обычный ход
-        if (abs(dy) == 1 && abs(dx) == 1 && !mustCapture) {
-            if (piece?.type == PieceType.MAN && dy != dir) return false
-            board.setPiece(Position(dr, dc),
-                piece
-            )
-            board.setPieceNull(Position(sr, sc), piece)
-            return true
-        }
-
-        // Захват
-        if (abs(dy) == 2 && abs(dx) == 2) {
-            val midR = sr + dy / 2
-            val midC = sc + dx / 2
-            val middle = board.getPiece(Position(midR, midC))
-            if (middle != null && middle.owner != piece?.owner) {
-                board.setPieceNull(Position(midR, midC), piece) // Удаляем захваченную
-                board.setPiece(Position(dr, dc), piece)
+            // Обычный ход
+            if (abs(dy) == 1 && abs(dx) == 1 && !mustCapture) {
+                if (piece?.type == PieceType.MAN && dy != dir) return false
+                board.setPiece(
+                    Position(dr, dc),
+                    piece
+                )
                 board.setPieceNull(Position(sr, sc), piece)
                 return true
             }
-        }
+
+            // Захват
+            if (abs(dy) == 2 && abs(dx) == 2) {
+                val midR = sr + dy / 2
+                val midC = sc + dx / 2
+                val middle = board.getPiece(Position(midR, midC))
+                if (middle != null && middle.owner != piece?.owner) {
+                    board.setPieceNull(Position(midR, midC), piece) // Удаляем захваченную
+                    board.setPiece(Position(dr, dc), piece)
+                    board.setPieceNull(Position(sr, sc), piece)
+                    return true
+                }
             }
+        }
         return false
     }
 
