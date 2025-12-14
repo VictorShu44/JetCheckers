@@ -51,7 +51,7 @@ class Board {
      * Получает шашку по координатам (строка, столбец)
      */
     fun getPiece(position: Position): Piece? {
-        Log.d("mov", "inside ${inside(position)}  ")
+        //Log.d("mov", "inside ${inside(position)}  ")
         return if (inside(position)) cells[position.row][position.col] else null
     }
 
@@ -155,7 +155,12 @@ class CheckersGame {
 
     fun restart() {
         board = Board()
-        createInitialGameState()
+      val state =  createInitialGameState()
+        gameState.value = gameState.value.copy(
+            board = state.board,
+            selectedPiece = state.selectedPiece,
+            statusMessage = state.statusMessage
+        )
     }
 
     /** Обрабатывает нажатие на клетку (row, col) */
@@ -195,8 +200,8 @@ class CheckersGame {
                     mustCapture = false
                     selectedPiece = null
                     moveRight = null
-                    updateState()
                     switchPlayer()
+                    updateState()
                 }
             } else {
                 // 3. Ход не удался, возможно, игрок хочет выбрать другую шашку
@@ -215,6 +220,7 @@ class CheckersGame {
                     mustCapture = false
                     selectedPiece = null
                     moveRight = null
+                   // switchPlayer()
                     updateState()
                 }
             }
