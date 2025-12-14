@@ -15,7 +15,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,10 +35,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.shu.jetnews.core.ui.components.AppBar
 
 @Composable
 fun CheckersScreen() {
-    val game = remember { CheckersGame() }
+    var game = remember { CheckersGame() }
     val gameState = game.gameState.value
 
     LaunchedEffect(gameState.currentPlayer) {
@@ -46,31 +55,51 @@ fun CheckersScreen() {
             game.moveBlackTo()
         }
     }
+    Scaffold(
+        topBar = {
+                AppBar(title = "Шашки", actions = {
+                    IconButton(
+                        onClick = {
+                            game = CheckersGame()
+                            game.restart() }
+                    ) {
+                        Icon(Icons.Filled.Refresh, "Trigger Refresh")
+                    }
+                    IconButton(
+                        onClick = {  }
+                    ) {
+                        Icon(Icons.Filled.Menu, "Trigger Refresh")
+                    }
+                })
 
-
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        },
     ) {
-        Text(
-            text = "Шашки",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
-        BoardView(
-            board = gameState.board,
-            selectedPiece = gameState.selectedPiece,
-            onCellClick = { row, col -> game.handleCellClick(row, col) }
-        )
+        Column(
+            modifier = Modifier.fillMaxSize().padding(it). padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-        Text(
-            text = gameState.statusMessage,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(top = 16.dp),
-            fontSize = 18.sp
-        )
+            Text(
+                text = "Шашки",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            BoardView(
+                board = gameState.board,
+                selectedPiece = gameState.selectedPiece,
+                onCellClick = { row, col -> game.handleCellClick(row, col) }
+            )
+
+            Text(
+                text = gameState.statusMessage,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 16.dp),
+                fontSize = 18.sp
+            )
+        }
     }
 }
 

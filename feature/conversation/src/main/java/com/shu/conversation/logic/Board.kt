@@ -5,10 +5,8 @@ package com.shu.conversation.logic
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.input.pointer.PointerIcon
 import com.shu.conversation.ai.AIFactory
 import com.shu.conversation.ai.AIFactory.Difficulty
-import com.shu.conversation.ai.printBoard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import kotlin.math.abs
@@ -53,6 +51,7 @@ class Board {
      * Получает шашку по координатам (строка, столбец)
      */
     fun getPiece(position: Position): Piece? {
+        Log.d("mov", "inside ${inside(position)}  ")
         return if (inside(position)) cells[position.row][position.col] else null
     }
 
@@ -137,7 +136,7 @@ data class GameState(
 class CheckersGame {
     private var board = Board()
 
-    private val mediumAI = AIFactory.createAI(Difficulty.MEDIUM)
+    private val mediumAI = AIFactory.createAI(Difficulty.HARD)
     private var selectedPiece: Pair<Int, Int>? = null
 
     private var moveRight: Move? = null
@@ -154,11 +153,21 @@ class CheckersGame {
         )
     }
 
+    fun restart() {
+        board = Board()
+        createInitialGameState()
+    }
+
     /** Обрабатывает нажатие на клетку (row, col) */
-    fun handleCellClick(row: Int, col: Int) {
+     fun handleCellClick(row: Int, col: Int) {
         val currentSelected = selectedPiece
         val clickedPiece = board.getPiece(Position(row, col))
-
+        clickedPiece?.let {
+            Log.d(
+                "mov",
+                "clickedPiece row ${clickedPiece?.position?.row} col ${clickedPiece?.position?.col}"
+            )
+        }
         if (currentSelected == null) {
             // 1. Попытка выбрать шашку
             if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
@@ -207,7 +216,6 @@ class CheckersGame {
                     selectedPiece = null
                     moveRight = null
                     updateState()
-                    switchPlayer()
                 }
             }
         }
@@ -254,6 +262,7 @@ class CheckersGame {
         moveRight?.let { move ->
             delay(1000L)
             handleCellClick(move.to.row, move.to.col)
+            updateState()
         }
     }
 

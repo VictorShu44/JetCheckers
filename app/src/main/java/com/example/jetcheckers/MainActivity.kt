@@ -98,10 +98,9 @@ fun JetCheckersApp(
              }
          }
      ) {*/
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavDisplay(
             backStack = navigator.backStack,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier,
             onBack = { navigator.goBack() },
             entryProvider = entryProvider {
                 entryProviderScopes.forEach { builder -> this.builder() }
@@ -125,7 +124,6 @@ fun JetCheckersApp(
                     }
                 },*/
         )
-    }
 }
 
 enum class AppDestinations(
