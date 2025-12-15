@@ -137,6 +137,7 @@ data class GameState(
 class CheckersGame {
     private var board = Board()
 
+    private var count = 1
     private val mediumAI = AIFactory.createAI(Difficulty.HARD)
     private var selectedPiece: Pair<Int, Int>? = null
 
@@ -172,11 +173,12 @@ class CheckersGame {
         clickedPiece?.let {
             Log.d(
                 "mov",
-                "clickedPiece row ${clickedPiece?.position?.row} col ${clickedPiece?.position?.col}"
+                "$count clickedPiece row ${clickedPiece?.position?.row} col ${clickedPiece?.position?.col}"
             )
-        } ?: Log.d("mov", "clickedPiece null")
+        } ?: Log.d("mov", "$count clickedPiece null $row $col")
         if (currentSelected == null) {
             // 1. Попытка выбрать шашку
+            Log.d("mov", "$count currentSelected null $row $col")
             if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
                 selectedPiece = Pair(row, col)
                 updateState()
@@ -189,30 +191,35 @@ class CheckersGame {
                 // Ход успешен
                 val isCapture = abs(row - srcRow) == 2
                 maybeKing(row, col)
-
+                Log.d("mov", "$count mustCapture $mustCapture isCapture ${row - srcRow}  src $srcRow $srcCol can capture $row $col")
                 // Проверяем, возможен ли следующий захват той же шашкой
                 if (isCapture && canCaptureFrom(row, col)) {
-                    Log.d("mov", "isCapture $isCapture ")
+
+                    Log.d("mov", "$count isCapture $mustCapture ")
                     mustCapture = true
                     selectedPiece = Pair(row, col) // Оставляем шашку выбранной для следующего хода
-                    updateState(newStatus = "Необходимо продолжить захват!")
+                    if(gameState.value.currentPlayer == Player.WHITE) {
+                        updateState(newStatus = "$count Необходимо продолжить захват!")
+                    } else {
+                       // moveBlackTo()
+                        updateState(newStatus = "$count moveBlack r $row - $col захват!")
+                    }
                 } else {
                     // Цепочка захватов окончена или это был обычный ход
-                    Log.d("mov", "switch Player ")
+                    Log.d("mov", "$count end $row $col and switch Player ")
                     mustCapture = false
                     selectedPiece = null
                     moveRight = null
                     moveAI = true
-                    Log.d("mov", "moveAI do")
                     switchPlayer()
                     updateState()
                 }
             } else {
                 // 3. Ход не удался, возможно, игрок хочет выбрать другую шашку
                 if (gameState.value.currentPlayer == Player.WHITE) {
-                    Log.d("mov", "Ход не удался, возможно, игрок хочет выбрать другую шашку ")
+                    Log.d("mov", "$count Ход не удался, возможно, игрок хочет выбрать другую шашку ")
                     if (clickedPiece != null && clickedPiece.owner == gameState.value.currentPlayer) {
-                        Log.d("mov", "Выбираем другую свою шашку ")
+                        Log.d("mov", "$count Выбираем другую свою шашку ")
                         selectedPiece = Pair(row, col) // Выбираем другую свою шашку
                         updateState()
                     } else {
@@ -221,14 +228,14 @@ class CheckersGame {
                     }
                 } else {
                     if (moveAI) {
-
+                        Log.d("mov", "$count ход moveAI r $row, c $col ")
                         mustCapture = false
                         selectedPiece = null
                         moveRight = null
                         switchPlayer()
                         updateState()
                     } else {
-                        Log.d("mov", "Неправильный ход r $row, c $col ")
+                        Log.d("mov", "$count Неправильный ход r $row, c $col ")
                         selectedPiece = null // Снимаем выделение
                         updateState()
                         moveBlack()
@@ -242,7 +249,8 @@ class CheckersGame {
         val nextPlayer = if (gameState.value.currentPlayer == Player.WHITE) {
             Player.BLACK
         } else Player.WHITE
-        val message = "Ход ${if (nextPlayer == Player.WHITE) "белых" else "чёрных"}"
+        count++
+        val message = "Ход ${if (nextPlayer == Player.WHITE) "белых $count" else "чёрных $count"}"
         gameState.value = gameState.value.copy(currentPlayer = nextPlayer, statusMessage = message)
     }
 
@@ -257,11 +265,29 @@ class CheckersGame {
     }
 
     fun moveBlack() {
-        var move: Move? = null
+        var move: List<Move?> = emptyList()
+        moveAI = false
         move = mediumAI.findBestMove(board.cells, Player.BLACK)
-        move?.let {
-            moveRight = move
-            handleCellClick(move.from.row, move.from.col)
+
+        if(move.size == 1) {
+            move.first()?.let { move ->
+                Log.d(
+                    "mov",
+                    "$count ход moveAI r ${move.from.row}, ${move.from.col} ${move.to.row},${move.to.col}"
+                )
+                moveRight = move
+                handleCellClick(move.from.row, move.from.col)
+            }
+        } else {
+            var t = ""
+            move.forEach { m ->
+
+                t = t + "[${m.from.row}-${m.from.col} ${m.to.row}-${m.to.col}] "
+            }
+            Log.d(
+                "mov",
+                t
+            )
         }
     }
 
@@ -291,6 +317,7 @@ class CheckersGame {
 
             // Обычный ход
             if (abs(dy) == 1 && abs(dx) == 1 && !mustCapture) {
+                Log.d("mov", "Обычный ход $dy $dx")
                 if (piece?.type == PieceType.MAN && dy != dir) return false
                 board.setPiece(
                     Position(dr, dc),
@@ -302,6 +329,7 @@ class CheckersGame {
 
             // Захват
             if (abs(dy) == 2 && abs(dx) == 2) {
+                Log.d("mov", "Захват $dy $dx")
                 val midR = sr + dy / 2
                 val midC = sc + dx / 2
                 val middle = board.getPiece(Position(midR, midC))

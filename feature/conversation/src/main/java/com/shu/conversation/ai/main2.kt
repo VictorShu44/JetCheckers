@@ -7,7 +7,7 @@ import com.shu.conversation.logic.Position
 
 fun main() {
     // Создаем тестовую позицию
-    val board = Array(8) { row ->
+   /* val board = Array(8) { row ->
         Array<Piece?>(8) { col ->
             when {
                 row == 2 && col == 3 -> Piece(Player.BLACK, PieceType.MAN, Position(row, col))
@@ -74,7 +74,7 @@ fun main() {
         val timeTaken = System.currentTimeMillis() - startTime
 
         println("Глубина $depth: ${move.from} -> ${move.to} (${timeTaken}мс)")
-    }
+    }*/
 }
 
 // Функция для отображения доски

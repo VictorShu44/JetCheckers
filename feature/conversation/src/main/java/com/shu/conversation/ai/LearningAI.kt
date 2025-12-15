@@ -12,7 +12,7 @@ class LearningAI : DraughtsAI(maxDepth = 3) {
     private val positionScores = mutableMapOf<String, Int>()
 
     // Улучшенная оценка с учетом истории
-    override fun findBestMove(board: Array<Array<Piece?>>, player: Player): Move {
+    override fun findBestMove(board: Array<Array<Piece?>>, player: Player): List<Move> {
         val boardHash = boardToHash(board, player)
 
         // Если позиция уже встречалась, используем сохраненную оценку
@@ -24,7 +24,7 @@ class LearningAI : DraughtsAI(maxDepth = 3) {
         val move = super.findBestMove(board, player)
 
         // Сохраняем историю для обучения
-        moveHistory.add(board to move)
+        moveHistory.add(board to move.first()) //берём из списка
 
         // Ограничиваем размер истории
         if (moveHistory.size > 1000) {

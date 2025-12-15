@@ -7,7 +7,7 @@ import com.shu.conversation.logic.Player
 import com.shu.conversation.logic.Position
 
 fun main() {
-    // Инициализация доски
+    /*// Инициализация доски
     val board = Array(8) { row ->
         Array<Piece?>(8) { col ->
             when {
@@ -41,15 +41,15 @@ fun main() {
     println("Сложный AI выбрал: ${hardMove.from} -> ${hardMove.to}")
 
     // AI с ошибками
-    /*val flawedAI = AIFactory.FlawedAI(mistakeProbability = 0.4)
+    *//*val flawedAI = AIFactory.FlawedAI(mistakeProbability = 0.4)
     println("\nAI с ошибками думает...")
     val flawedMove = flawedAI.findBestMove(board, Player.WHITE)
-    println("AI с ошибками выбрал: ${flawedMove.from} -> ${flawedMove.to}")*/
+    println("AI с ошибками выбрал: ${flawedMove.from} -> ${flawedMove.to}")*//*
 
     // Сравнение оценки позиции
     val evaluator = PositionEvaluator()
     val positionScore = evaluator.evaluate(board, Player.WHITE)
-    println("\nОценка текущей позиции для белых: $positionScore")
+    println("\nОценка текущей позиции для белых: $positionScore")*/
 }
 
 
