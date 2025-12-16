@@ -8,7 +8,6 @@ import com.shu.conversation.logic.Player
 import com.shu.conversation.logic.Position
 
 // AI с разными уровнями сложности
-/*
 open class DraughtsAI2(
     private val maxDepth: Int = 3,  // глубина поиска (1-7)
     private val randomness: Double = 0.0  // уровень случайности (0.0-1.0)
@@ -203,4 +202,4 @@ open class DraughtsAI2(
         Player.WHITE -> Player.BLACK
         Player.BLACK -> Player.WHITE
     }
-}*/
+}

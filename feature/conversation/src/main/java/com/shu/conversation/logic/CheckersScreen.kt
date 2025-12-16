@@ -49,12 +49,10 @@ fun CheckersScreen() {
         }
     }
     LaunchedEffect(gameState.selectedPiece) {
-        if(gameState.currentPlayer == Player.BLACK) {
-            gameState.selectedPiece?.let {
+        gameState.selectedPiece?.let {
 
-                Log.d("mov", " player ${gameState.currentPlayer} two")
-                game.moveBlackTo()
-            }
+            Log.d("mov", "player ${gameState.currentPlayer} two")
+            game.moveBlackTo()
         }
     }
     Scaffold(

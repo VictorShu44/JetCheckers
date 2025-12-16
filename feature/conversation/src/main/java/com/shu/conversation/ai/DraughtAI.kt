@@ -7,7 +7,6 @@ import com.shu.conversation.logic.Piece
 import com.shu.conversation.logic.PieceType
 import com.shu.conversation.logic.Player
 import com.shu.conversation.logic.Position
-import kotlin.collections.ifEmpty
 
 
 // Дополняем класс DraughtsAI
@@ -20,98 +19,49 @@ open class DraughtsAI(
     private val evaluator = PositionEvaluator()
 
     // Основной метод поиска лучшего хода с заданной глубиной
-    fun findBestMoveAtDepth(board: Array<Array<Piece?>>, player: Player, depth: Int): List<Move> {
+    fun findBestMoveAtDepth(board: Array<Array<Piece?>>, player: Player, depth: Int): Move {
         val moves = moveGenerator.generateAllMoves(board, player)
 
 
-        /*if (moves.isEmpty()) {
+        if (moves.isEmpty()) {
             throw IllegalStateException("Нет возможных ходов для игрока $player")
-        }*/
-        if (moves.first.isEmpty()) {
-            if (moves.second.size == 1) return moves.second
-
-            // if (moves.size == 3) return moves
-
-            // Для очень простого AI (depth=1) можно использовать быструю оценку
-            if (depth == 1) {
-                return findBestImmediateMove(board, player, moves.second)
-            }
-
-            var bestMove = moves.second[0]
-            var bestValue = Int.MIN_VALUE
-
-            // Перебираем все ходы и выбираем лучший
-
-            for (move in moves.second) {
-
-                val newBoard = applyMove(board, move)
-                val value = minimax(
-                    board = newBoard,
-                    depth = depth - 1,
-                    alpha = Int.MIN_VALUE,
-                    beta = Int.MAX_VALUE,
-                    maximizingPlayer = false, // Следующий ход - противник
-                    currentPlayer = player,
-                    originalPlayer = player,
-                    weights = weights
-                )
-
-                if (value > bestValue) {
-                    bestValue = value
-                    bestMove = move
-                    Log.d(
-                        "mov",
-                        "find ${move.from.row},${move.from.col}, ${move.to.row}, ${move.to.col}"
-                    )
-                }
-            }
-
-
-            return listOf(bestMove)
-        } else {
-
-            Log.d("mov", "Захват size ${moves.first.size}")
-            if (moves.first.size == 1) return moves.first
-
-            // if (moves.size == 3) return moves
-
-            // Для очень простого AI (depth=1) можно использовать быструю оценку
-            if (depth == 1) {
-                return findBestImmediateMove(board, player, moves.first)
-            }
-          //  var movBest = mutableListOf<Move>()
-      val   movBest = moves.first.reversed()
-
-            var bestMove = moves.first[0]
-            var bestValue = Int.MIN_VALUE
-
-            // Перебираем все ходы и выбираем лучший
-
-            for (move in movBest) {
-
-                val newBoard = applyMove(board, move)
-                val value = minimax(
-                    board = newBoard,
-                    depth = depth - 1,
-                    alpha = Int.MIN_VALUE,
-                    beta = Int.MAX_VALUE,
-                    maximizingPlayer = false, // Следующий ход - противник
-                    currentPlayer = player,
-                    originalPlayer = player,
-                    weights = weights
-                )
-
-                if (value > bestValue) {
-                    bestValue = value
-                    bestMove = move
-                    Log.d(
-                        "mov",
-                        "find best ${move.from.row},${move.from.col}, ${move.to.row}, ${move.to.col} *************************"
-                    )
-                }
-            }
-            return listOf(bestMove)
         }
+
+        if (moves.size == 1) return moves[0]
+
+        // Для очень простого AI (depth=1) можно использовать быструю оценку
+        if (depth == 1) {
+            return findBestImmediateMove(board, player, moves)
+        }
+
+        var bestMove = moves[0]
+        var bestValue = Int.MIN_VALUE
+
+        // Перебираем все ходы и выбираем лучший
+
+        for (move in moves) {
+
+            val newBoard = applyMove(board, move)
+            val value = minimax(
+                board = newBoard,
+                depth = depth - 1,
+                alpha = Int.MIN_VALUE,
+                beta = Int.MAX_VALUE,
+                maximizingPlayer = false, // Следующий ход - противник
+                currentPlayer = player,
+                originalPlayer = player,
+                weights = weights
+            )
+
+            if (value > bestValue) {
+                bestValue = value
+                bestMove = move
+                Log.d("mov", "find ${move.from.row},${move.from.col}, ${move.to.row}, ${move.to.col}")
+            }
+        }
+
+
+        return bestMove
     }
 
     // Быстрая оценка для самого поверхностного поиска
@@ -119,9 +69,9 @@ open class DraughtsAI(
         board: Array<Array<Piece?>>,
         player: Player,
         moves: List<Move>
-    ): List<Move> {
+    ): Move {
         // Простая эвристика: предпочитаем взятия, затем превращения, затем центральные позиции
-        val mov = moves.maxByOrNull { move ->
+        return moves.maxByOrNull { move ->
             var score = 0
 
             // Бонус за взятия
@@ -153,8 +103,6 @@ open class DraughtsAI(
 
             score
         } ?: moves.random()
-
-        return listOf(mov)
     }
 
     // Полный метод минимакс с альфа-бета отсечением
@@ -174,9 +122,8 @@ open class DraughtsAI(
             return evaluator.evaluate(board, originalPlayer, weights)
         }
 
-        val movesPair = moveGenerator.generateAllMoves(board, currentPlayer)
+        val moves = moveGenerator.generateAllMoves(board, currentPlayer)
 
-        val moves = movesPair.first.ifEmpty { movesPair.second }
         // Если нет возможных ходов
         if (moves.isEmpty()) {
             return if (currentPlayer == originalPlayer) {
@@ -261,11 +208,10 @@ open class DraughtsAI(
         // Итеративное углубление: начинаем с глубины 1 и увеличиваем, пока не закончится время
         while (System.currentTimeMillis() -
 
-            startTime < timeLimitMs && depth <= maxDepth
-        ) {
+            startTime < timeLimitMs && depth <= maxDepth) {
             try {
                 // Пытаемся найти лучший ход на текущей глубине
-                bestMoveAtDepth = findBestMoveAtDepth(board, player, depth).first()
+                bestMoveAtDepth = findBestMoveAtDepth(board, player, depth)
                 bestMove = bestMoveAtDepth
 
                 // Если нашли выигрышный ход, возвращаем его сразу
@@ -289,7 +235,7 @@ open class DraughtsAI(
             }
         }
 
-        return bestMove ?: findBestMoveAtDepth(board, player, 1).first()
+        return bestMove ?: findBestMoveAtDepth(board, player, 1)
     }
 
     // Проверка, является ли ход выигрышным
@@ -313,35 +259,30 @@ open class DraughtsAI(
         if (!opponentHasPieces) return true
 
         // Проверяем, есть ли у противника ходы
-        val movesPair = moveGenerator.generateAllMoves(newBoard, opponent)
-        val moves = movesPair.first.ifEmpty { movesPair.second }
-        return moves.isEmpty()
+        return moveGenerator.generateAllMoves(newBoard, opponent).isEmpty()
     }
 
     // Оригинальный метод findBestMove (использует максимальную глубину)
-    open fun findBestMove(board: Array<Array<Piece?>>, player: Player): List<Move> {
-        val movesPair = moveGenerator.generateAllMoves(board, player)
-        val moves = movesPair.first.ifEmpty { movesPair.second }
+    open fun findBestMove(board: Array<Array<Piece?>>, player: Player): Move {
+        val moves = moveGenerator.generateAllMoves(board, player)
 
         if (moves.isEmpty()) {
             throw IllegalStateException("Нет возможных ходов")
         }
 
-        if (moves.size == 1) return moves
+        if (moves.size == 1) return moves[0]
 
         // Применяем случайность для "тупого" AI
-        /*  if (randomness > 0.0 && Math.random() < randomness) {
-              return if (Math.random() < 0.3) {
-                  // 30% шанс выбрать худший ход
-                  findWorstMove(board, player, moves)
-              } else {
-                  moves.random()
-              }
-          }
-  */
-        val mov = findBestMoveAtDepth(board, player, maxDepth)
-
-        return mov
+      /*  if (randomness > 0.0 && Math.random() < randomness) {
+            return if (Math.random() < 0.3) {
+                // 30% шанс выбрать худший ход
+                findWorstMove(board, player, moves)
+            } else {
+                moves.random()
+            }
+        }
+*/
+        return findBestMoveAtDepth(board, player, maxDepth)
 
     }
 
@@ -409,11 +350,9 @@ open class DraughtsAI(
 
         // Ставим шашку на новую позицию
         val movedPiece = if (move.becomesKing) {
-            piece?.copy(
-                type = PieceType.KING,
+            piece?.copy(type = PieceType.KING,
 
-                position = move.to
-            )
+                position = move.to)
         } else {
             piece?.copy(position = move.to)
         }
@@ -444,9 +383,7 @@ open class DraughtsAI(
             if (hasPieces) break
         }
 
-        val movesPair = moveGenerator.generateAllMoves(board, player)
-        val moves = movesPair.first.ifEmpty { movesPair.second }
-        return !hasPieces || moves.isEmpty()
+        return !hasPieces || moveGenerator.generateAllMoves(board, player).isEmpty()
     }
 
 
