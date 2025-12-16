@@ -61,15 +61,15 @@ class DraughtsMoveGenerator {
                     val moves = generateMovesForPiece(board, piece)
                     // Разделяем взятия и простые ходы
                     moves.forEach { move ->
-                        var t = ""
+                        /*var t = ""
                         move.captured.forEach { p ->
                             t = t + " ${p.row}- ${p.col}"
 
                         }
                         if (t.isNotEmpty()) {
-                            Log.d("mov", "size Capted ${move.captured.size}")
-                            Log.d("mov", " list capter $t")
-                        }
+                          //  Log.d("mov", "size Capted ${move.captured.size}")
+                           // Log.d("mov", " list capter $t")
+                        }*/
                         if (move.captured.isNotEmpty()) {
                             captureMoves.add(move)
                         } else {

@@ -5,7 +5,7 @@ import com.shu.conversation.logic.PieceType
 import com.shu.conversation.logic.Player
 import com.shu.conversation.logic.Position
 
-fun main() {
+fun main2() {
     // Создаем тестовую позицию
     val board = Array(8) { row ->
         Array<Piece?>(8) { col ->

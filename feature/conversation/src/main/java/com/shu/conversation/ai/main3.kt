@@ -1,28 +1,34 @@
 package com.shu.conversation.ai
 
-/*
+import com.shu.conversation.logic.DraughtsMoveGenerator
+import com.shu.conversation.logic.Piece
+import com.shu.conversation.logic.PieceType
+import com.shu.conversation.logic.Player
+import com.shu.conversation.logic.Position
+
 fun main() {
     // Создаем тестовую позицию с возможностью взятия 2 шашек
     val board = Array(8) { row ->
         Array<Piece?>(8) { col ->
             when {
                 // Черная шашка
-                row == 2 && col == 2 -> Piece(Player.BLACK, PieceType.REGULAR, Position(row, col))
+                row == 2 && col == 2 -> Piece(Player.BLACK, PieceType.MAN, Position(row, col))
                 // Белые шашки для взятия
-                row == 3 && col == 3 -> Piece(Player.WHITE, PieceType.REGULAR, Position(row, col))
-                row == 5 && col == 5 -> Piece(Player.WHITE, PieceType.REGULAR, Position(row, col))
+                row == 3 && col == 3 -> Piece(Player.WHITE, PieceType.MAN, Position(row, col))
+                row == 5 && col == 5 -> Piece(Player.WHITE, PieceType.MAN, Position(row, col))
                 // Пустая доска для второй белой шашки
                 row == 3 && col == 1 ->
 
-                    Piece(Player.WHITE, PieceType.REGULAR, Position(row, col))
-                row == 1 && col == 3 -> Piece(Player.WHITE, PieceType.REGULAR, Position(row, col))
+                    Piece(Player.WHITE, PieceType.MAN, Position(row, col))
+
+                row == 1 && col == 3 -> Piece(Player.WHITE, PieceType.MAN, Position(row, col))
                 else -> null
             }
         }
     }
 
     println("Исходная позиция:")
-    printBoard(board)
+    printBoard2(board)
 
     val generator = DraughtsMoveGenerator()
     val blackMoves = generator.generateAllMoves(board, Player.BLACK)
@@ -48,7 +54,7 @@ fun main() {
         val executor = MoveExecutor()
         val newBoard = executor.executeMove(board, move)
         println("  Позиция после хода:")
-        printBoard(newBoard)
+        printBoard2(newBoard)
     }
 
     // Выбор хода с максимальным количеством взятий
@@ -56,13 +62,13 @@ fun main() {
     println("\nЛучший ход (максимальное количество взятий):")
     bestMove?.let { move ->
         println("  Срубает ${move.captured.size} шашек")
-        println("  Путь: ${move.fullPath.joinToString(" -> ")}")
+        println("  Путь: ${move.intermediatePositions.joinToString(" -> ")}")
     }
 
 }
 
 // Функция для отображения доски
-fun printBoard(board: Array<Array<Piece?>>) {
+fun printBoard2(board: Array<Array<Piece?>>) {
     println("   a b c d e f g h")
     for (row in 0..7) {
         print("${8 - row} ")
@@ -70,10 +76,10 @@ fun printBoard(board: Array<Array<Piece?>>) {
             val piece = board[row][col]
             val symbol = when {
                 piece == null -> if ((row + col) % 2 == 0) "□" else "■"
-                piece.player == Player.WHITE && piece.type == PieceType.REGULAR -> "○"
-                piece.player == Player.BLACK && piece.type == PieceType.REGULAR -> "●"
-                piece.player == Player.WHITE && piece.type == PieceType.KING -> "ⓦ"
-                piece.player == Player.BLACK && piece.type == PieceType.KING -> "ⓑ"
+                piece.owner == Player.WHITE && piece.type == PieceType.MAN -> "○"
+                piece.owner == Player.BLACK && piece.type == PieceType.MAN -> "●"
+                piece.owner == Player.WHITE && piece.type == PieceType.KING -> "ⓦ"
+                piece.owner == Player.BLACK && piece.type == PieceType.KING -> "ⓑ"
 
                 else -> "?"
             }
@@ -83,4 +89,3 @@ fun printBoard(board: Array<Array<Piece?>>) {
     }
     println("   a b c d e f g h")
 }
-*/
