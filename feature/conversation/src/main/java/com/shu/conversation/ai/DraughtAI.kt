@@ -11,7 +11,7 @@ import com.shu.conversation.logic.Position
 
 // Дополняем класс DraughtsAI
 open class DraughtsAI(
-    val maxDepth: Int = 3,
+    open val maxDepth: Int = 3,
     private val randomness: Double = 0.0,
     private val weights: PositionEvaluator.Weights = PositionEvaluator.Weights()
 ) {
@@ -75,8 +75,28 @@ open class DraughtsAI(
             var score = 0
 
             // Бонус за взятия
-            score += move.captured.size * 100
+            //score += move.captured.size * 100
+// Бонус за длинные цепочки взятий
+            if (move.captured.size > 1) {
+                // Экспоненциальный бонус за каждую дополнительную шашку в цепочке
+                score += (move.captured.size - 1) *
 
+                        150
+
+                // Дополнительный бонус за превращение в дамку в ходе цепочки
+                if (move.becomesKing) {
+                    score += 100
+                }
+            }
+
+            /*// Бонус за безопасные цепочки (когда не оставляем шашку под боем)
+            if (move.intermediatePositions.isNotEmpty()) {
+                val simulatedBoard = applyMove(board, move)
+                if (!isPieceUnderAttack(simulatedBoard, move.to, player)) {
+                    score += 50
+                }
+
+            }*/
             // Бонус за превращение в дамку
 
             if (move.becomesKing) {
