@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,45 +44,73 @@ fun CheckersScreen() {
     var game = remember { CheckersGame() }
     val gameState = game.gameState.value
 
-    LaunchedEffect(gameState.currentPlayer) {
-        if (gameState.currentPlayer == Player.BLACK) {
+    val aiEnableTwo = remember { mutableStateOf(false) }
+
+    val onCheckedChange = {
+        aiEnableTwo.value = !aiEnableTwo.value
+        game.setOnlyAI(aiEnableTwo.value)
+    }
+
+    LaunchedEffect(gameState.currentPlayer,aiEnableTwo) {
+        if (gameState.currentPlayer == Player.BLACK && aiEnableTwo.value) {
             Log.d("mov", "player ${gameState.currentPlayer} one")
             game.moveBlack()
-        }
+        } /*else if(aiEnableTwo.value) {
+            Log.d("mov", "player ${gameState.currentPlayer} one")
+            game.moveBlack()
+        }*/
     }
     LaunchedEffect(gameState.selectedPiece) {
         gameState.selectedPiece?.let {
-
-            Log.d("mov", "player ${gameState.currentPlayer} two")
-            game.moveBlackTo()
+            if (gameState.currentPlayer == Player.BLACK && aiEnableTwo.value) {
+                Log.d("mov", "player ${gameState.currentPlayer} two")
+                game.moveBlackTo()
+            } /*else if(aiEnableTwo.value) {
+                Log.d("mov", "player ${gameState.currentPlayer} two")
+                game.moveBlackTo()
+            }*/
         }
     }
     Scaffold(
         topBar = {
-                AppBar(title = "Шашки", actions = {
-                    IconButton(
-                        onClick = {
-                            game = CheckersGame()
-                            game.restart() }
-                    ) {
-                        Icon(Icons.Filled.Refresh, "Trigger Refresh")
+            AppBar(title = "Шашки", actions = {
+                IconButton(
+                    onClick = {
+                        game = CheckersGame()
+                        game.restart()
                     }
-                    IconButton(
-                        onClick = {  }
-                    ) {
-                        Icon(Icons.Filled.Menu, "Trigger Refresh")
+                ) {
+                    Icon(Icons.Filled.Refresh, "Trigger Refresh")
+                }
+                IconButton(
+                    onClick = {
                     }
-                })
+                ) {
+                    Icon(Icons.Filled.Menu, "Trigger Refresh")
+                }
+            })
 
         },
     ) {
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(it). padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(it).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
 
+            Row {
+                Checkbox(
+                    checked = aiEnableTwo.value,
+                    onCheckedChange = { onCheckedChange() },
+                    modifier = Modifier,
+                )
+                Text(
+                    text = "Включить AI",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
             Text(
                 text = "Шашки",
                 style = MaterialTheme.typography.headlineMedium,

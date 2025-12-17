@@ -142,6 +142,7 @@ class CheckersGame {
     private var selectedPiece: Pair<Int, Int>? = null
 
     private var moveAI: Boolean = false
+    private var isOnlyAi: Boolean = false
     private var moveRight: Move? = null
     private var mustCapture = false // Флаг, указывающий на обязательный захват
 
@@ -238,7 +239,7 @@ class CheckersGame {
                         mustCapture = false
                         selectedPiece = null
                         moveRight = null
-                        switchPlayer()
+                       if(!isOnlyAi) switchPlayer()
                         updateState()
                     } else {
                         Log.d("mov", "$count Неправильный ход r $row, c $col ")
@@ -249,6 +250,11 @@ class CheckersGame {
                 }
             }
         }
+    }
+
+    fun setOnlyAI(on: Boolean) {
+        isOnlyAi = on
+
     }
 
     private fun switchPlayer() {
